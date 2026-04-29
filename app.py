@@ -10,10 +10,9 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'MECHAEL_SUPER_SECRET')
 
-# 2. FUNGSI KONEKSI DATABASE (POSTGRESQL)
+# 2. FUNGSI KONEKSI DATABASE
 def get_db_connection():
-    conn = psycopg2.connect(os.getenv('DATABASE_URL'))
-    return conn
+    return psycopg2.connect(os.getenv('DATABASE_URL'))
 
 # 3. INISIALISASI DATABASE
 def init_db():
@@ -42,7 +41,6 @@ def init_db():
     if not cur.fetchone():
         cur.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)", 
                     ('admin', 'admin123', 'admin'))
-    
     conn.commit()
     cur.close()
     conn.close()
@@ -61,6 +59,7 @@ def index():
     conn.close()
     return render_template('index.html', products=products)
 
+# FITUR DAFTAR AKUN (REGISTER) - INI YANG TADI HILANG
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -68,7 +67,9 @@ def register():
         conn = get_db_connection()
         cur = conn.cursor()
         try:
-            cur.execute('INSERT INTO users (username, password, role) VALUES (%s, %s, %s)', (username, password, 'user'))
+            # Menyimpan user baru ke database
+            cur.execute('INSERT INTO users (username, password, role) VALUES (%s, %s, %s)', 
+                        (username, password, 'user'))
             conn.commit()
             return redirect(url_for('login'))
         except:
@@ -88,7 +89,6 @@ def login():
         user = cur.fetchone()
         cur.close()
         conn.close()
-        
         if user:
             session.update({'logged_in': True, 'user_id': user['id'], 'username': user['username'], 'role': user['role']})
             return redirect(url_for('index'))
@@ -108,32 +108,37 @@ def add_to_cart(product_id):
     user_id = session['user_id']
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    
     cur.execute('SELECT * FROM cart WHERE user_id = %s AND product_id = %s', (user_id, product_id))
     item = cur.fetchone()
-    
     if item:
         cur.execute('UPDATE cart SET quantity = quantity + 1 WHERE id = %s', (item['id'],))
     else:
         cur.execute('INSERT INTO cart (user_id, product_id, quantity) VALUES (%s, %s, 1)', (user_id, product_id))
-    
     conn.commit()
     cur.close()
     conn.close()
     return redirect(url_for('cart'))
 
-# FITUR BARU: UPDATE JUMLAH (+ / -)
 @app.route('/cart/update/<int:cart_id>/<action>', methods=['POST'])
 def update_cart_quantity(cart_id, action):
     if not session.get('logged_in'): return redirect(url_for('login'))
     conn = get_db_connection()
     cur = conn.cursor()
-    
     if action == 'add':
         cur.execute('UPDATE cart SET quantity = quantity + 1 WHERE id = %s', (cart_id,))
     elif action == 'sub':
         cur.execute('UPDATE cart SET quantity = quantity - 1 WHERE id = %s AND quantity > 1', (cart_id,))
-    
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for('cart'))
+
+@app.route('/cart/delete/<int:cart_id>', methods=['POST'])
+def delete_cart_item(cart_id):
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('DELETE FROM cart WHERE id = %s', (cart_id,))
     conn.commit()
     cur.close()
     conn.close()
@@ -161,21 +166,18 @@ def checkout():
     user_id = session['user_id']
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    
     cur.execute('SELECT * FROM cart WHERE user_id = %s', (user_id,))
     items = cur.fetchall()
     if not items: return redirect(url_for('cart'))
-    
     for item in items:
         cur.execute('UPDATE products SET stock = stock - %s WHERE id = %s', (item['quantity'], item['product_id']))
-        
     cur.execute('DELETE FROM cart WHERE user_id = %s', (user_id,))
     conn.commit()
     cur.close()
     conn.close()
     return render_template('cart.html', success=True, items=[], total=0)
 
-# --- RUTE ADMIN ---
+# --- RUTE ADMIN API ---
 
 @app.route('/admin')
 def admin():
