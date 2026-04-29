@@ -12,7 +12,6 @@ app.secret_key = os.getenv('SECRET_KEY', 'MECHAEL_SUPER_SECRET')
 
 # 2. FUNGSI KONEKSI DATABASE (POSTGRESQL)
 def get_db_connection():
-    # Mengambil URL dari Neon.tech yang ada di file .env
     conn = psycopg2.connect(os.getenv('DATABASE_URL'))
     return conn
 
@@ -20,7 +19,6 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
-    # SQL PostgreSQL menggunakan SERIAL untuk ID otomatis
     cur.execute('''CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY, 
         name TEXT NOT NULL, 
@@ -38,9 +36,8 @@ def init_db():
         id SERIAL PRIMARY KEY, 
         user_id INTEGER NOT NULL, 
         product_id INTEGER NOT NULL, 
-        quantity INTEGER NOT NULL)''')
+        quantity INTEGER NOT NULL DEFAULT 1)''')
     
-    # Buat Admin Default jika belum ada
     cur.execute("SELECT * FROM users WHERE username = 'admin'")
     if not cur.fetchone():
         cur.execute("INSERT INTO users (username, password, role) VALUES (%s, %s, %s)", 
@@ -50,7 +47,6 @@ def init_db():
     cur.close()
     conn.close()
 
-# Jalankan init_db satu kali saat app menyala
 init_db()
 
 # --- ROUTES FRONTEND ---
@@ -58,9 +54,8 @@ init_db()
 @app.route('/')
 def index():
     conn = get_db_connection()
-    # RealDictCursor digunakan agar hasil query bisa diakses seperti dictionary (p['name'])
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute('SELECT * FROM products WHERE stock > 0')
+    cur.execute('SELECT * FROM products WHERE stock > 0 ORDER BY id DESC')
     products = cur.fetchall()
     cur.close()
     conn.close()
@@ -127,6 +122,23 @@ def add_to_cart(product_id):
     conn.close()
     return redirect(url_for('cart'))
 
+# FITUR BARU: UPDATE JUMLAH (+ / -)
+@app.route('/cart/update/<int:cart_id>/<action>', methods=['POST'])
+def update_cart_quantity(cart_id, action):
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    if action == 'add':
+        cur.execute('UPDATE cart SET quantity = quantity + 1 WHERE id = %s', (cart_id,))
+    elif action == 'sub':
+        cur.execute('UPDATE cart SET quantity = quantity - 1 WHERE id = %s AND quantity > 1', (cart_id,))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    return redirect(url_for('cart'))
+
 @app.route('/cart')
 def cart():
     if not session.get('logged_in'): return redirect(url_for('login'))
@@ -135,7 +147,7 @@ def cart():
     cur.execute('''
         SELECT cart.id as cart_id, products.name, products.price, cart.quantity, products.id as product_id
         FROM cart JOIN products ON cart.product_id = products.id
-        WHERE cart.user_id = %s
+        WHERE cart.user_id = %s ORDER BY cart.id ASC
     ''', (session['user_id'],))
     items = cur.fetchall()
     total = sum([item['price'] * item['quantity'] for item in items])
@@ -161,7 +173,7 @@ def checkout():
     conn.commit()
     cur.close()
     conn.close()
-    return render_template('cart.html', success=True)
+    return render_template('cart.html', success=True, items=[], total=0)
 
 # --- RUTE ADMIN ---
 
