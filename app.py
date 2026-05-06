@@ -95,40 +95,6 @@ def login():
         return render_template('login.html', error="Username/Password salah!")
     return render_template('login.html')
 
-# --- FITUR LUPA PASSWORD ---
-@app.route('/forgot_password', methods=['GET', 'POST'])
-def forgot_password():
-    if request.method == 'POST':
-        # MENGGUNAKAN .get() AGAR LEBIH AMAN DAN TIDAK CRASH
-        username = request.form.get('username')
-        new_password = request.form.get('new_password')
-        
-        # Validasi: Jika ada form yang tidak terkirim/kosong
-        if not username or not new_password:
-            return render_template('forgot_password.html', error="Terjadi kesalahan, pastikan form terisi lengkap!")
-        
-        conn = get_db_connection()
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        # Cek apakah username tersebut ada di database
-        cur.execute('SELECT * FROM users WHERE username = %s', (username,))
-        user = cur.fetchone()
-        
-        if user:
-            # Jika ada, update password-nya
-            cur.execute('UPDATE users SET password = %s WHERE username = %s', (new_password, username))
-            conn.commit()
-            cur.close()
-            conn.close()
-            # Arahkan kembali ke halaman login dengan pesan sukses
-            return render_template('login.html', success="Password berhasil diubah! Silakan login dengan password baru.")
-        else:
-            cur.close()
-            conn.close()
-            return render_template('forgot_password.html', error="Username tidak ditemukan!")
-            
-    return render_template('forgot_password.html')
-
 @app.route('/logout')
 def logout():
     session.clear()

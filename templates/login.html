@@ -10,26 +10,10 @@
         <div class="row justify-content-center">
             <div class="col-md-4 card p-4 text-dark shadow">
                 <h3 class="text-center">Login</h3>
-                
-                <!-- Pesan Error -->
                 {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
-                
-                <!-- Pesan Sukses (Untuk Notifikasi Reset Password) -->
-                {% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
-                
                 <form method="POST">
-                    <div class="mb-3">
-                        <label>Username</label>
-                        <input type="text" name="username" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Password</label>
-                        <input type="password" name="password" class="form-control" required>
-                        <!-- Link Lupa Password disisipkan di sini -->
-                        <div class="text-end mt-1">
-                            <a href="/forgot_password" class="small text-decoration-none">Lupa Password?</a>
-                        </div>
-                    </div>
+                    <div class="mb-3"><label>Username</label><input type="text" name="username" class="form-control" required></div>
+                    <div class="mb-3"><label>Password</label><input type="password" name="password" class="form-control" required></div>
                     <button type="submit" class="btn btn-primary w-100">Masuk</button>
                 </form>
                 <p class="mt-3 text-center small">Belum punya akun? <a href="/register">Daftar</a></p>
