@@ -6,182 +6,66 @@
     <title>MEGZ STORE ID - PC & Tech</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
     <style>
-        body { 
-            background-color: #f8f9fa; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .navbar-brand { font-weight: 800; letter-spacing: 1px; }
-        
-        /* Desain Banner Atas (Hero) */
-        .hero-section {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            padding: 5rem 0;
-            margin-bottom: 3rem;
-            border-radius: 0 0 30px 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-        
-        /* Animasi Kartu Produk */
-        .product-card {
-            transition: all 0.3s ease;
-            border: none;
-            border-radius: 15px;
-            overflow: hidden;
-            background: white;
-        }
-        .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
-        }
-        
-        /* Placeholder Gambar Kotak Atas */
-        .card-header-custom {
-            background: #e2e8f0;
-            height: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            color: #94a3b8;
-            transition: color 0.3s ease;
-        }
-        .product-card:hover .card-header-custom {
-            color: #3b82f6; /* Berubah biru saat di-hover */
-        }
-        
-        /* Teks Harga & Kategori */
-        .price-tag {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: #059669;
-        }
-        .category-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(15, 23, 42, 0.85);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-            backdrop-filter: blur(4px);
-        }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+        .hero-section { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 5rem 0; border-radius: 0 0 30px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 3rem; }
+        .product-card { transition: all 0.3s ease; border: none; border-radius: 15px; overflow: hidden; background: white; }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; }
+        .card-header-custom { background: #e2e8f0; height: 160px; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: #94a3b8; }
+        .price-tag { font-size: 1.3rem; font-weight: 800; color: #059669; }
+        .category-badge { position: absolute; top: 15px; right: 15px; background: rgba(15, 23, 42, 0.85); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; backdrop-filter: blur(4px); }
     </style>
 </head>
 <body>
-
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="/">
-                <i class="bi bi-pc-display-horizontal fs-4 me-2 text-primary"></i> 
-                MEGZ STORE ID
+                <i class="bi bi-pc-display-horizontal fs-4 me-2 text-primary"></i> MEGZ STORE ID
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    {% if session.logged_in %}
-                        <li class="nav-item text-light me-4">
-                            <i class="bi bi-person-circle me-1"></i> Halo, <span class="fw-bold">{{ session.username }}</span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-outline-light btn-sm px-4 rounded-pill me-2 d-flex align-items-center" href="/cart">
-                                <i class="bi bi-cart3 me-2"></i> Keranjang
-                            </a>
-                        </li>
-                        {% if session.role == 'admin' %}
-                        <li class="nav-item">
-                            <a class="nav-link text-warning fw-bold d-flex align-items-center" href="/admin">
-                                <i class="bi bi-speedometer2 me-1"></i> Dashboard Admin
-                            </a>
-                        </li>
-                        {% endif %}
-                        <li class="nav-item ms-2">
-                            <a class="nav-link text-danger text-decoration-underline" href="/logout">Keluar</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item me-2"><a class="nav-link fw-bold" href="/login">Masuk</a></li>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-primary btn-sm px-4 rounded-pill text-white fw-bold shadow-sm" href="/register">Daftar Akun</a>
-                        </li>
-                    {% endif %}
-                </ul>
+            <div class="ms-auto d-flex align-items-center">
+                {% if session.logged_in %}
+                    <span class="text-light me-3 small d-none d-md-inline">Halo, <b>{{ session.username }}</b></span>
+                    <a href="/cart" class="btn btn-outline-light btn-sm rounded-pill px-3 me-2"><i class="bi bi-cart3"></i></a>
+                    <a href="/logout" class="text-danger small">Keluar</a>
+                {% else %}
+                    <a href="/login" class="btn btn-primary btn-sm rounded-pill px-4">Masuk</a>
+                {% endif %}
             </div>
         </div>
     </nav>
 
-    <div class="hero-section">
-        <div class="container text-center">
-            <h1 class="display-4 fw-bold mb-3">Rakit PC Impianmu Sekarang</h1>
-            <p class="lead text-light opacity-75 mb-4 max-w-2xl mx-auto">Temukan komponen komputer dan aksesoris laptop terbaik dengan kualitas terjamin dan harga paling bersaing di pasaran.</p>
-            <a href="#katalog" class="btn btn-primary btn-lg rounded-pill px-5 shadow-lg fw-bold">
-                Jelajahi Katalog <i class="bi bi-arrow-down-circle ms-2"></i>
-            </a>
+    <div class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold">Rakit PC Impianmu</h1>
+            <p class="lead opacity-75">Hardware & Aksesoris terbaik untuk setup kamu.</p>
         </div>
     </div>
 
-    <div class="container mb-5 flex-grow-1" id="katalog">
-        <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
-            <h3 class="fw-bold mb-0"><i class="bi bi-cpu me-2 text-primary"></i>Produk Tersedia</h3>
-        </div>
-
+    <div class="container mb-5 flex-grow-1">
+        <h3 class="fw-bold mb-4 border-bottom pb-2">Katalog Produk</h3>
         <div class="row g-4">
-            {% if products %}
-                {% for p in products %}
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="card product-card shadow-sm h-100 position-relative">
-                        <span class="category-badge"><i class="bi bi-tag-fill me-1"></i>{{ p.category }}</span>
-                        
-                        <div class="card-header-custom">
-                            <i class="bi bi-gpu-card"></i>
-                        </div>
-                        
-                        <div class="card-body d-flex flex-column p-4">
-                            <h5 class="card-title fw-bold text-dark">{{ p.name }}</h5>
-                            
-                            <div class="mt-auto pt-3 border-top">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="price-tag">Rp {{ "{:,.0f}".format(p.price).replace(',', '.') }}</span>
-                                    <span class="badge bg-light text-secondary border px-2 py-1">
-                                        <i class="bi bi-box-seam me-1"></i>Sisa: {{ p.stock }}
-                                    </span>
-                                </div>
-                                
-                                <form action="/add_to_cart/{{ p.id }}" method="POST">
-                                    <button type="submit" class="btn btn-dark w-100 rounded-pill shadow-sm fw-bold">
-                                        <i class="bi bi-cart-plus fs-5 me-1"></i> + Keranjang
-                                    </button>
-                                </form>
-                            </div>
+            {% for p in products %}
+            <div class="col-md-3">
+                <div class="card product-card shadow-sm h-100 position-relative">
+                    <span class="category-badge">{{ p.category }}</span>
+                    <div class="card-header-custom"><i class="bi bi-cpu"></i></div>
+                    <div class="card-body d-flex flex-column p-4">
+                        <h5 class="card-title fw-bold">{{ p.name }}</h5>
+                        <div class="mt-auto">
+                            <p class="price-tag mb-3">Rp {{ "{:,.0f}".format(p.price).replace(',', '.') }}</p>
+                            <form action="/add_to_cart/{{ p.id }}" method="POST">
+                                <button class="btn btn-dark w-100 rounded-pill fw-bold">Beli (Stok: {{ p.stock }})</button>
+                            </form>
                         </div>
                     </div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <div class="col-12 text-center py-5">
-                    <i class="bi bi-inboxes text-muted opacity-50" style="font-size: 5rem;"></i>
-                    <h4 class="mt-3 text-muted">Waduh, toko sedang kosong!</h4>
-                    <p class="text-muted">Admin belum menambahkan produk PC apapun.</p>
-                </div>
-            {% endif %}
+            </div>
+            {% endfor %}
         </div>
     </div>
 
-    <footer class="bg-dark text-light text-center py-4 mt-auto border-top border-secondary">
-        <div class="container">
-            <h5 class="fw-bold mb-1"><i class="bi bi-pc-display-horizontal me-2"></i>MEGZ STORE ID</h5>
-            <p class="text-muted small mb-0">&copy; 2026 Seluruh Hak Cipta Dilindungi.</p>
-        </div>
+    <footer class="bg-dark text-light text-center py-4 mt-auto">
+        <small>&copy; 2026 MEGZ STORE ID. All Rights Reserved.</small>
     </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
